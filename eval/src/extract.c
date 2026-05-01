@@ -1,4 +1,5 @@
 #include "extract.h"
+#include <stddef.h>
 
 void running_sum( 
 	sample_t *samples, 	// input array of length sample_size
@@ -44,7 +45,7 @@ void running_difference(
 struct event *trigger_search( 
 	sample_t *samples,	// array of processed samples
 	unsigned sample_size,	// length of array
-	struct parameters *p;
+	struct parameters *p
 	) {
 
 	static enum { initial, idle, triggered } trigger_state = initial;
@@ -64,19 +65,19 @@ struct event *trigger_search(
 		case idle:
 			if( samples[i] < p->lld ) break; // nothing to do
 			trigger_state = triggered;
-			e->peak = e->rise = i;
-			e->height = samples[i];
+			e.peak = e.rise = i;
+			e.height = samples[i];
 			break;
 			
 		case triggered:
 			if( samples[i] < p->lld - p->hys ) {
-				e->fall = i;
+				e.fall = i;
 				trigger_state = idle;
 				return &e;
 			}
-			if( samples[i] > e->height ) {
-				e->peak = i;
-				e->height = samples[ i ];
+			if( samples[i] > e.height ) {
+				e.peak = i;
+				e.height = samples[ i ];
 			}
 		}	
 	}

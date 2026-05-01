@@ -5,3 +5,7 @@ get_samples : get_samples.o ad4080.o
 	
 binary_samples : binary_samples.o ad4080.o
 	$(CC) $^ $(LDLIBS) -o $@
+
+tx : tx.o extract.o
+	$(CC) $^ $(LDLIBS) -o $@
+

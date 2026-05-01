@@ -21,4 +21,4 @@ struct parameters {
 struct event {
 	uint32_t rise, peak, fall;
 	sample_t height;
-}
+};
