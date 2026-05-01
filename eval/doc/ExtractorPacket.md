@@ -11,6 +11,7 @@ Field | Length | Content
 id  | 1      | 0xC0DE0001
 shape | 1 | Shaping time in samples
 trigger | 1 | Trigger threshhold ADU
+hysteresis | 1 | Trigger hysteresis ADU
 dump | 1 | Dump threshold ADU
 
 #####Dump message
