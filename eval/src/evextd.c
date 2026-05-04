@@ -1,3 +1,12 @@
+#include "evextd.h"
+#include "ad4080.h"
+#include "extract.h"
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 int init_my_port (unsigned port)
 {
 // Create socket
@@ -47,7 +56,7 @@ FILE *connect_client( int sock ) {
 	}
 }
 
-void check_id( uint32 id, uint32 expected ) {
+void check_id( uint32_t id, uint32_t expected ) {
 	if( id == expected ) return;
 	fprintf( stderr, "Expected packet ID %X, saw %X\n", expected, id );
 	exit( 1 );
@@ -55,15 +64,27 @@ void check_id( uint32 id, uint32 expected ) {
 
 void go( struct ad4080 adc, struct parameters p, FILE *client ) {
 // These are a bit bigger than necessary, but it's simple to make them fixed size
-	sample_t sums[ BUFFER_SAMPLES ], differences[ BUFFER_SAMPLES ];	
+	sample_t sums[ BUFFER_SAMPLES ], diffs[ BUFFER_SAMPLES ];
+	const uint32_t datid = DATA_ID;
+	size_t written;
 	
 	for(;;) {
-		int32t *samples = get_4080_samples( adc );
+		int32_t *samples = get_4080_samples( adc );
 		running_sum( samples, sums, BUFFER_SAMPLES, p.shape );
-		running_differences( sums, differences, 
+		running_difference( sums, diffs, 
 			BUFFER_SAMPLES - p.shape + 1, p.shape );
-		
-		
+		struct event *e;
+		while ( e = trigger_search( 
+			diffs, BUFFER_SAMPLES - 2 * p.shape + 1, &p )) {
+			
+			written = fwrite( &datid, sizeof datid, 1, client );
+			if( written != 1 ) return;
+			written = fwrite( e, sizeof *e, 1, client );
+			if( written != 1 ) return;
+			written =  fwrite( samples + e->peak, 
+				sizeof( sample_t ), 2 * p.shape, client );
+			if( written != 2 * p.shape ) return;
+		}
 	}
 }
 
@@ -87,7 +108,7 @@ int main( int argc, char *argv[] ) {
 		check_id( id, START_ID );
 		
 		struct parameters p;
-		int items = fread( &p, sizeof p, 1, client );
+		items = fread( &p, sizeof p, 1, client );
 		if( items != 1 ) {
 			perror( "parameters");
 			exit( 1 );

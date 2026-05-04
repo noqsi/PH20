@@ -1,3 +1,6 @@
+#ifndef EXTRACT_H
+#define EXTRACT_H 1
+
 #include <stdint.h>
 
 typedef int32_t sample_t;
@@ -22,3 +25,5 @@ struct event {
 	uint32_t rise, peak, fall;
 	sample_t height;
 };
+
+#endif // ndef EXTRACT_H
