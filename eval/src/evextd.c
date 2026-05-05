@@ -51,7 +51,7 @@ FILE *connect_client( int sock ) {
 	}
 	FILE *stream = fdopen( fd, "r+" );
 	if( !stream ) {
-		perror( "open input");
+		perror( "opening client connection");
 		exit( 1 );
 	}
 }

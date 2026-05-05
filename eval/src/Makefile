@@ -1,4 +1,5 @@
 LDLIBS=-liio
+CFLAGS=-ggdb
 
 get_samples : get_samples.o ad4080.o
 	$(CC) $^ $(LDLIBS) -o $@
@@ -10,4 +11,7 @@ tx : tx.o extract.o
 	$(CC) $^ $(LDLIBS) -o $@
 
 evextd: evextd.o ad4080.o extract.o
+	$(CC) $^ $(LDLIBS) -o $@
+
+sddacq: sddacq.o router_client.o
 	$(CC) $^ $(LDLIBS) -o $@
