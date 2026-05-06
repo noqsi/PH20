@@ -1,5 +1,5 @@
 LDLIBS=-liio
-CFLAGS=-ggdb
+CFLAGS=-ggdb -Wall
 
 get_samples : get_samples.o ad4080.o
 	$(CC) $^ $(LDLIBS) -o $@

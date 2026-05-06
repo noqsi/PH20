@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 int init_my_port (unsigned port)
 {
@@ -31,10 +32,12 @@ int init_my_port (unsigned port)
     
 // Make it listen
 
-    if( listen (mys, 1) != 0 ) {
+    if( listen (mys, 5) != 0 ) {
     	perror( "init_my_port; listen");
 	exit( 1 );
     }
+    
+    printf( "Listening on socket %d\n", mys );
     
     return (mys);
 }
@@ -43,6 +46,8 @@ FILE *connect_client( int sock ) {
 	
 	struct sockaddr remote;
 	socklen_t remotel;
+	
+	printf( "Try accept on socket %d\n", sock );
 	
 	int fd = accept( sock, &remote, &remotel );
 	if( fd < 0 ) {
@@ -54,6 +59,10 @@ FILE *connect_client( int sock ) {
 		perror( "opening client connection");
 		exit( 1 );
 	}
+	
+	printf( "Opened a stream on fd %d\n", fd );
+	
+	return stream;
 }
 
 void check_id( uint32_t id, uint32_t expected ) {
@@ -92,6 +101,8 @@ int main( int argc, char *argv[] ) {
 
 	int sock = init_my_port ( EXTRACTOR_PORT );
 	struct ad4080 adc = connect_4080();
+	
+	signal(SIGPIPE, SIG_IGN);	// let stdio see the break
 	
 // Main loop
 
