@@ -53,24 +53,29 @@ struct event *trigger_search(
 	static int i = 0;
 	static struct event e;
 	
+// adjust thresholds for filter gain
+	
+	sample_t trig = p->shape * p->lld;
+	sample_t untrig = trig - p->shape * p-> hys;
+	
 	for( ; i < sample_size; i += 1 ) {
 		
 		switch( trigger_state ) {
 	
 		case initial:
-			if( samples[i] < p->lld - p->hys )
+			if( samples[i] < untrig )
 				trigger_state = idle;
 			break;
 			
 		case idle:
-			if( samples[i] < p->lld ) break; // nothing to do
+			if( samples[i] < trig ) break; // nothing to do
 			trigger_state = triggered;
 			e.peak = e.rise = i;
 			e.height = samples[i];
 			break;
 			
 		case triggered:
-			if( samples[i] < p->lld - p->hys ) {
+			if( samples[i] < untrig ) {
 				e.fall = i;
 				trigger_state = idle;
 				return &e;
