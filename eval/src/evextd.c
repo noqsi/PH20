@@ -42,7 +42,6 @@ void go( struct ad4080 adc, struct parameters p ) {
 
 int main( int argc, char *argv[] ) {
 
-	int sock = init_my_port ( EXTRACTOR_PORT );
 	struct ad4080 adc = connect_4080();
 	
 //	signal(SIGPIPE, SIG_IGN);	// let stdio see the break
