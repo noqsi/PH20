@@ -3,6 +3,7 @@
 #include "extract.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -83,8 +84,8 @@ void go( struct ad4080 adc, struct parameters p, FILE *client ) {
 		running_difference( sums, diffs, 
 			BUFFER_SAMPLES - p.shape + 1, p.shape );
 		struct event *e;
-		while ( e = trigger_search( 
-			diffs, BUFFER_SAMPLES - 2 * p.shape + 1, &p )) {
+		while (( e = trigger_search( 
+			diffs, BUFFER_SAMPLES - 2 * p.shape + 1, &p ))) {
 			
 			written = fwrite( &datid, sizeof datid, 1, client );
 			if( written != 1 ) return;
@@ -104,29 +105,27 @@ int main( int argc, char *argv[] ) {
 	
 	signal(SIGPIPE, SIG_IGN);	// let stdio see the break
 	
-// Main loop
-
-	for(;;) {
-		FILE *client = connect_client( sock );
-		
+	FILE *client = connect_client( sock );
+	
 // Read the start message
-		uint32_t id;
-		int items = fread( &id, sizeof id, 1, client );
-		if( items != 1 ) {
-			perror( "start");
-			exit( 1 );
-		}
-		check_id( id, START_ID );
-		
-		struct parameters p;
-		items = fread( &p, sizeof p, 1, client );
-		if( items != 1 ) {
-			perror( "parameters");
-			exit( 1 );
-		}
-		
-		go( adc, p, client );	// do the work
-		
-		fclose( client );	// done	
-	}	
+	uint32_t id;
+	int items = fread( &id, sizeof id, 1, client );
+	if( items != 1 ) {
+		perror( "start");
+		exit( 1 );
+	}
+	check_id( id, START_ID );
+	
+	struct parameters p;
+	items = fread( &p, sizeof p, 1, client );
+	if( items != 1 ) {
+		perror( "parameters");
+		exit( 1 );
+	}
+	
+	go( adc, p, client );	// do the work
+	
+	fclose( client );	// done
+	close (sock );
+	disconnect_4080( adc );	
 }
